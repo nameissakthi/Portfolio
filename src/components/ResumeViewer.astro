@@ -1,68 +1,44 @@
 ---
-import {
-  Download,
-  X,
-} from "lucide-astro";
-
+import { Download, X } from "lucide-astro";
 import { personal } from "../../data/details";
 
-const src = personal.resume.replace(
-  /^\/public/,
-  ""
-);
+const src = personal.resume;
 ---
 
 <dialog
   id="resume-dialog"
-  data-src={src}
   aria-label="Resume preview"
-  class="m-auto h-[90vh] max-h-[1100px] w-[94vw] max-w-[980px] overflow-hidden rounded-[20px] border border-[#232323] bg-[#0e0e0e] p-0 text-[#f5f5f5] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)] backdrop:bg-black/75 backdrop:backdrop-blur-md"
+  class="m-auto h-[92vh] w-[94vw] max-w-[1000px] overflow-hidden rounded-[20px] border border-[#232323] bg-[#0e0e0e] p-0 text-[#f5f5f5] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)] backdrop:bg-black/75 backdrop:backdrop-blur-md"
 >
-
   <div class="flex h-full flex-col">
 
     <!-- Toolbar -->
-
     <div
-      class="flex items-center justify-between gap-3 border-b border-[#232323] px-5 py-3"
+      class="flex shrink-0 items-center justify-between gap-3 border-b border-[#232323] bg-[#0e0e0e] px-5 py-3"
     >
-
       <!-- Title -->
-
       <div class="flex items-center gap-2.5">
+        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
 
-        <span
-          class="h-2 w-2 rounded-full bg-emerald-400"
-        ></span>
-
-        <p
-          class="m-0 text-sm font-medium tracking-[-0.01em]"
-        >
+        <p class="m-0 text-sm font-medium tracking-[-0.01em]">
           Resume
         </p>
-
       </div>
 
-
       <!-- Actions -->
-
       <div class="flex items-center gap-2">
 
         <!-- Download -->
-
         <a
           href={src}
           download="Sakthivel-Resume.pdf"
           class="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#0a0a0a] no-underline transition-transform duration-200 hover:-translate-y-0.5"
         >
           <Download class="h-4 w-4" />
-
           Download
         </a>
 
-
         <!-- Close -->
-
         <button
           type="button"
           data-resume-close
@@ -73,36 +49,70 @@ const src = personal.resume.replace(
         </button>
 
       </div>
-
     </div>
 
-
-    <!-- PDF pages -->
-
+    <!-- PDF viewer -->
     <div
-      class="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#111] p-4"
+      class="relative min-h-0 flex-1 overflow-y-auto bg-[#202020] p-4 sm:p-6"
     >
 
-      <p
-        id="resume-status"
-        class="absolute inset-0 m-0 flex items-center justify-center px-6 text-center text-sm text-[#666]"
+      <!-- Loading -->
+      <div
+        id="resume-loading"
+        class="absolute inset-0 z-10 flex items-center justify-center bg-[#111]"
       >
-        Loading resume…
-      </p>
+        <div class="flex items-center gap-3 text-sm text-[#777]">
+          <span
+            class="h-4 w-4 animate-spin rounded-full border-2 border-[#444] border-t-[#f5f5f5]"
+          ></span>
 
+          Loading resume...
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div
+        id="resume-error"
+        class="absolute inset-0 z-10 hidden items-center justify-center bg-[#111] px-6 text-center"
+      >
+        <div>
+          <p class="text-sm text-[#777]">
+            Couldn't display the resume.
+          </p>
+
+          <a
+            href={src}
+            download="Sakthivel-Resume.pdf"
+            class="mt-4 inline-flex rounded-full bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#0a0a0a] no-underline"
+          >
+            Download Resume
+          </a>
+        </div>
+      </div>
+
+      <!-- PDF pages -->
       <div
         id="resume-pages"
-        class="flex flex-col items-center gap-4"
+        class="mx-auto flex max-w-[900px] flex-col items-center gap-5"
       ></div>
 
     </div>
-
   </div>
-
 </dialog>
 
-
 <script>
+  import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+  import workerSrc from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
+
+  /*
+   * Tell PDF.js where its worker is.
+   *
+   * Vite turns ?url into the final production
+   * URL of the bundled worker file.
+   */
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    workerSrc;
+
   const dialog =
     document.querySelector<HTMLDialogElement>(
       "#resume-dialog"
@@ -113,147 +123,139 @@ const src = personal.resume.replace(
       "#resume-pages"
     );
 
-  const status =
+  const loading =
     document.querySelector<HTMLElement>(
-      "#resume-status"
+      "#resume-loading"
     );
 
-
-  /*
-   * PDF.js
-   */
-
-  const PDFJS =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build";
-
+  const error =
+    document.querySelector<HTMLElement>(
+      "#resume-error"
+    );
 
   if (
     dialog &&
     pages &&
-    status
+    loading &&
+    error
   ) {
     const src =
-      dialog.dataset.src ?? "";
+      dialog.dataset.src ??
+      "/resume.pdf";
 
-    let started = false;
+    let loaded = false;
 
+    const showLoading = () => {
+      loading.classList.remove("hidden");
+      loading.classList.add("flex");
 
-    const showStatus = (
-      message: string
-    ) => {
-      status.textContent =
-        message;
-
-      status.classList.remove(
-        "hidden"
-      );
+      error.classList.add("hidden");
+      error.classList.remove("flex");
     };
 
+    const showError = () => {
+      loading.classList.add("hidden");
+      loading.classList.remove("flex");
 
-    const render = async () => {
+      error.classList.remove("hidden");
+      error.classList.add("flex");
+    };
 
-      started = true;
+    const renderResume = async () => {
+      if (loaded) {
+        return;
+      }
 
       try {
+        showLoading();
 
         /*
          * Fetch PDF
          */
-
         const response =
           await fetch(src);
 
         if (!response.ok) {
           throw new Error(
-            `NOT_FOUND:${response.status}`
+            `PDF request failed: ${response.status}`
           );
         }
-
 
         const data =
           new Uint8Array(
             await response.arrayBuffer()
           );
 
-
         /*
-         * Load PDF.js
+         * Load PDF
          */
-
-        const pdfjs =
-          await import(
-            /* @vite-ignore */
-            `${PDFJS}/pdf.min.mjs`
-          );
-
-
-        pdfjs.GlobalWorkerOptions.workerSrc =
-          `${PDFJS}/pdf.worker.min.mjs`;
-
-
-        /*
-         * Load document
-         */
-
         const pdf =
-          await pdfjs
+          await pdfjsLib
             .getDocument({
               data,
             })
             .promise;
 
-
         /*
          * Calculate display size
          */
-
         const dpr =
-          window.devicePixelRatio || 1;
-
-        const available =
           Math.min(
-            pages.clientWidth - 32,
+            window.devicePixelRatio || 1,
+            2
+          );
+
+        const availableWidth =
+          Math.min(
+            pages.clientWidth,
             900
           );
 
-
         /*
-         * Render every page
+         * Render each page
          */
-
         for (
-          let number = 1;
-          number <= pdf.numPages;
-          number++
+          let pageNumber = 1;
+          pageNumber <= pdf.numPages;
+          pageNumber++
         ) {
-
           const page =
-            await pdf.getPage(number);
+            await pdf.getPage(
+              pageNumber
+            );
 
-
-          const base =
+          const baseViewport =
             page.getViewport({
               scale: 1,
             });
 
-
           const scale =
-            (available / base.width) *
-            dpr;
-
+            availableWidth /
+            baseViewport.width;
 
           const viewport =
             page.getViewport({
-              scale,
+              scale:
+                scale * dpr,
             });
-
 
           const canvas =
             document.createElement(
               "canvas"
             );
 
+          const context =
+            canvas.getContext(
+              "2d"
+            );
 
+          if (!context) {
+            continue;
+          }
+
+          /*
+           * High resolution canvas
+           */
           canvas.width =
             Math.floor(
               viewport.width
@@ -264,126 +266,78 @@ const src = personal.resume.replace(
               viewport.height
             );
 
-
+          /*
+           * Display size
+           */
           canvas.style.width =
             `${viewport.width / dpr}px`;
 
           canvas.style.height =
             `${viewport.height / dpr}px`;
 
-
           canvas.className =
-            "rounded-md bg-white shadow-lg";
-
+            "block max-w-full rounded-sm bg-white shadow-[0_10px_40px_rgba(0,0,0,0.4)]";
 
           pages.appendChild(
             canvas
           );
 
-
-          const context =
-            canvas.getContext(
-              "2d"
-            );
-
-
-          if (!context) {
-            continue;
-          }
-
-
           await page.render({
-            canvasContext:
-              context,
-
+            canvasContext: context,
             viewport,
           }).promise;
-
-
-          status.classList.add(
-            "hidden"
-          );
         }
 
-      } catch (error) {
+        loaded = true;
 
-        console.error(
-          "[resume preview]",
-          error
+        loading.classList.add(
+          "hidden"
         );
 
+        loading.classList.remove(
+          "flex"
+        );
 
-        started = false;
+      } catch (err) {
+        console.error(
+          "Resume preview error:",
+          err
+        );
 
         pages.replaceChildren();
 
-
-        const notFound =
-          error instanceof Error &&
-          error.message.startsWith(
-            "NOT_FOUND"
-          );
-
-
-        showStatus(
-          notFound
-            ? `Resume file not found at ${src}. Check that it is inside the public folder.`
-            : "Couldn't load the preview. Use the Download button instead."
-        );
+        showError();
       }
     };
 
-
     /*
-     * Open modal
+     * Open resume
      */
-
-    const open = () => {
-
-      dialog.showModal();
-
-      document.documentElement.style.overflow =
-        "hidden";
-
-
-      if (!started) {
-
-        showStatus(
-          "Loading resume…"
-        );
-
-        render();
-      }
-    };
-
-
-    /*
-     * Resume buttons
-     */
-
     document
       .querySelectorAll<HTMLElement>(
         "[data-resume-open]"
       )
-      .forEach((element) => {
+      .forEach((button) => {
 
-        element.addEventListener(
+        button.addEventListener(
           "click",
           (event) => {
-
             event.preventDefault();
 
-            open();
+            dialog.showModal();
+
+            document.documentElement.style.overflow =
+              "hidden";
+
+            renderResume();
           }
         );
 
       });
 
-
     /*
      * Close button
      */
-
     dialog
       .querySelector(
         "[data-resume-close]"
@@ -395,11 +349,9 @@ const src = personal.resume.replace(
         }
       );
 
-
     /*
-     * Close when clicking backdrop
+     * Close by clicking backdrop
      */
-
     dialog.addEventListener(
       "click",
       (event) => {
@@ -413,15 +365,12 @@ const src = personal.resume.replace(
       }
     );
 
-
     /*
-     * Restore page scrolling
+     * Restore scrolling
      */
-
     dialog.addEventListener(
       "close",
       () => {
-
         document.documentElement.style.overflow =
           "";
       }

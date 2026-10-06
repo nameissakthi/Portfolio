@@ -13,7 +13,7 @@ export const personal = {
 
   linkedin: "https://linkedin.com/in/sakthiveldhanushkodi",
 
-  resume: "/public/resume.pdf",
+  resume: "/resume.pdf",
 };
 
 export const experience = [
