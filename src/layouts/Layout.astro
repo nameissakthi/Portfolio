@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import Analytics from "@vercel/analytics/astro";
-import SpeedInsights from "@vercel/speed-insights/astro"
+import SpeedInsights from "@vercel/speed-insights/astro";
 
 interface Props {
   title?: string;
@@ -10,129 +10,164 @@ interface Props {
 
 const {
   title = "Sakthivel",
-  description = "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
+  description =
+    "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
 } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
-
-    <Analytics />
-    <SpeedInsights />
-
     <meta charset="UTF-8" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
 
-    <meta name="description" content={description} />
+    <meta
+      name="description"
+      content={description}
+    />
 
-    <meta name="theme-color" content="#0a0a0a" />
+    <meta
+      name="theme-color"
+      content="#0a0a0a"
+    />
 
-    <link rel="icon" href="/public/favicon.svg" />
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg?v=4"
+    />
+
+    <link
+      rel="shortcut icon"
+      href="/favicon.svg?v=4"
+    />
 
     <title>{title}</title>
+
+    <!-- Vercel -->
+    <Analytics />
+    <SpeedInsights />
   </head>
 
   <body>
     <slot />
-  </body>
-</html>
 
-<script>
-  const originalTitle = "Sakthivel";
+    <script>
+      const originalTitle = "Sakthivel";
 
-  const glitchFrames = [
-    "Sakthive_",
-    "Sakthiv3l",
-    "Sakth!vel",
-    "Sakth1vel",
-    "Sakthivel",
-  ];
+      const glitchFrames = [
+        "Sakthive_",
+        "Sakthiv3l",
+        "Sakth!vel",
+        "Sakth1vel",
+        "Sakthivel",
+      ];
 
-  let isGlitching = false;
-  let glitchTimer: number | undefined;
-  let intervalTimer: number | undefined;
+      let isGlitching = false;
+      let glitchTimer: number | undefined;
+      let intervalTimer: number | undefined;
 
-  const glitchTitle = () => {
-    // Don't run when the tab is inactive
-    if (document.hidden || isGlitching) return;
-
-    isGlitching = true;
-
-    let frame = 0;
-
-    glitchTimer = window.setInterval(() => {
-      // Stop immediately if the user switches tabs
-      if (document.hidden) {
-        if (glitchTimer) {
-          clearInterval(glitchTimer);
+      const glitchTitle = () => {
+        if (document.hidden || isGlitching) {
+          return;
         }
 
-        document.title = originalTitle;
-        isGlitching = false;
-        return;
-      }
+        isGlitching = true;
 
-      document.title = glitchFrames[frame];
+        let frame = 0;
 
-      frame++;
+        glitchTimer = window.setInterval(() => {
+          if (document.hidden) {
+            if (glitchTimer) {
+              clearInterval(glitchTimer);
+            }
 
-      if (frame >= glitchFrames.length) {
-        if (glitchTimer) {
-          clearInterval(glitchTimer);
+            document.title = originalTitle;
+            isGlitching = false;
+
+            return;
+          }
+
+          document.title =
+            glitchFrames[frame];
+
+          frame++;
+
+          if (
+            frame >=
+            glitchFrames.length
+          ) {
+            if (glitchTimer) {
+              clearInterval(
+                glitchTimer
+              );
+            }
+
+            document.title =
+              originalTitle;
+
+            isGlitching = false;
+          }
+        }, 90);
+      };
+
+      const startGlitchTimer = () => {
+        if (intervalTimer) {
+          clearInterval(
+            intervalTimer
+          );
         }
 
-        document.title = originalTitle;
-        isGlitching = false;
-      }
-    }, 90);
-  };
+        if (!document.hidden) {
+          intervalTimer =
+            window.setInterval(() => {
+              if (
+                !document.hidden
+              ) {
+                glitchTitle();
+              }
+            }, 7000);
+        }
+      };
 
-  const startGlitchTimer = () => {
-    // Clear existing timer
-    if (intervalTimer) {
-      clearInterval(intervalTimer);
-    }
-
-    // Only schedule glitches when the tab is active
-    if (!document.hidden) {
-      intervalTimer = window.setInterval(() => {
+      window.setTimeout(() => {
         if (!document.hidden) {
           glitchTitle();
         }
-      }, 7000);
-    }
-  };
+      }, 1500);
 
-  // Run once after the page loads
-  window.setTimeout(() => {
-    if (!document.hidden) {
-      glitchTitle();
-    }
-  }, 1500);
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.hidden) {
+            if (glitchTimer) {
+              clearInterval(
+                glitchTimer
+              );
+            }
 
-  // Detect tab switching
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      // Stop any running glitch
-      if (glitchTimer) {
-        clearInterval(glitchTimer);
-      }
+            document.title =
+              originalTitle;
 
-      document.title = originalTitle;
-      isGlitching = false;
+            isGlitching = false;
 
-      // Stop the recurring timer
-      if (intervalTimer) {
-        clearInterval(intervalTimer);
-      }
-    } else {
-      // User came back to the tab
+            if (intervalTimer) {
+              clearInterval(
+                intervalTimer
+              );
+            }
+          } else {
+            startGlitchTimer();
+          }
+        }
+      );
+
       startGlitchTimer();
-    }
-  });
-
-  // Start recurring timer
-  startGlitchTimer();
-</script>
+    </script>
+  </body>
+</html>
