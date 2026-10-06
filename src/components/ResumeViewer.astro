@@ -1,29 +1,67 @@
 ---
-import { Download, X } from "lucide-astro";
+import {
+  Download,
+  X,
+} from "lucide-astro";
+
 import { personal } from "../../data/details";
 
-/* Files in /public are served from the site root, so "/public/resume.pdf" becomes "/resume.pdf". */
-const src = personal.resume.replace(/^\/public/, "");
+const src = personal.resume.replace(
+  /^\/public/,
+  ""
+);
 ---
 
-<dialog id="resume-dialog" data-src={src} aria-label="Resume preview" class="resume-dialog">
+<dialog
+  id="resume-dialog"
+  data-src={src}
+  aria-label="Resume preview"
+  class="m-auto h-[90vh] max-h-[1100px] w-[94vw] max-w-[980px] overflow-hidden rounded-[20px] border border-[#232323] bg-[#0e0e0e] p-0 text-[#f5f5f5] shadow-[0_40px_120px_-20px_rgba(0,0,0,0.9)] backdrop:bg-black/75 backdrop:backdrop-blur-md"
+>
+
   <div class="flex h-full flex-col">
+
     <!-- Toolbar -->
-    <div class="flex items-center justify-between gap-3 border-b border-[#232323] px-5 py-3">
+
+    <div
+      class="flex items-center justify-between gap-3 border-b border-[#232323] px-5 py-3"
+    >
+
+      <!-- Title -->
+
       <div class="flex items-center gap-2.5">
-        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-        <p class="m-0 text-sm font-medium tracking-[-0.01em]">Resume</p>
+
+        <span
+          class="h-2 w-2 rounded-full bg-emerald-400"
+        ></span>
+
+        <p
+          class="m-0 text-sm font-medium tracking-[-0.01em]"
+        >
+          Resume
+        </p>
+
       </div>
 
+
+      <!-- Actions -->
+
       <div class="flex items-center gap-2">
+
+        <!-- Download -->
+
         <a
           href={src}
           download="Sakthivel-Resume.pdf"
           class="inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#0a0a0a] no-underline transition-transform duration-200 hover:-translate-y-0.5"
         >
           <Download class="h-4 w-4" />
+
           Download
         </a>
+
+
+        <!-- Close -->
 
         <button
           type="button"
@@ -33,146 +71,360 @@ const src = personal.resume.replace(/^\/public/, "");
         >
           <X class="h-4 w-4" />
         </button>
+
       </div>
+
     </div>
 
-    <!-- Preview: pages are drawn here as canvases -->
-    <div class="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#111] p-4">
-      <p id="resume-status" class="absolute inset-0 m-0 flex items-center justify-center px-6 text-center text-sm text-[#666]">Loading resume…</p>
-      <div id="resume-pages" class="flex flex-col items-center gap-4"></div>
+
+    <!-- PDF pages -->
+
+    <div
+      class="relative min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#111] p-4"
+    >
+
+      <p
+        id="resume-status"
+        class="absolute inset-0 m-0 flex items-center justify-center px-6 text-center text-sm text-[#666]"
+      >
+        Loading resume…
+      </p>
+
+      <div
+        id="resume-pages"
+        class="flex flex-col items-center gap-4"
+      ></div>
+
     </div>
+
   </div>
+
 </dialog>
 
-<style>
-  .resume-dialog {
-    margin: auto;
-    width: min(980px, 94vw);
-    height: min(90vh, 1100px);
-    max-width: none;
-    max-height: none;
-    padding: 0;
-    overflow: hidden;
-    border: 1px solid #232323;
-    border-radius: 20px;
-    background: #0e0e0e;
-    color: #f5f5f5;
-    box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.9);
-  }
-
-  .resume-dialog[open] {
-    animation: resume-pop 220ms ease-out;
-  }
-
-  .resume-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-
-  @keyframes resume-pop {
-    from {
-      opacity: 0;
-      transform: translateY(14px) scale(0.98);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .resume-dialog[open] {
-      animation: none;
-    }
-  }
-</style>
 
 <script>
-  const dialog = document.querySelector<HTMLDialogElement>("#resume-dialog");
-  const pages = document.querySelector<HTMLElement>("#resume-pages");
-  const status = document.querySelector<HTMLElement>("#resume-status");
+  const dialog =
+    document.querySelector<HTMLDialogElement>(
+      "#resume-dialog"
+    );
 
-  // PDF.js is loaded from a CDN, and only the first time the resume is opened.
-  const PDFJS = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build";
+  const pages =
+    document.querySelector<HTMLElement>(
+      "#resume-pages"
+    );
 
-  if (dialog && pages && status) {
-    const src = dialog.dataset.src ?? "";
+  const status =
+    document.querySelector<HTMLElement>(
+      "#resume-status"
+    );
+
+
+  /*
+   * PDF.js
+   */
+
+  const PDFJS =
+    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/legacy/build";
+
+
+  if (
+    dialog &&
+    pages &&
+    status
+  ) {
+    const src =
+      dialog.dataset.src ?? "";
+
     let started = false;
 
-    const showStatus = (message: string) => {
-      status.textContent = message;
-      status.classList.remove("hidden");
+
+    const showStatus = (
+      message: string
+    ) => {
+      status.textContent =
+        message;
+
+      status.classList.remove(
+        "hidden"
+      );
     };
 
+
     const render = async () => {
+
       started = true;
 
       try {
-        // 1. Make sure the file is really there
-        const res = await fetch(src);
-        if (!res.ok) throw new Error(`NOT_FOUND:${res.status}`);
-        const data = new Uint8Array(await res.arrayBuffer());
 
-        // 2. Load PDF.js and draw each page onto a canvas
-        const pdfjs = await import(/* @vite-ignore */ `${PDFJS}/pdf.min.mjs`);
-        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS}/pdf.worker.min.mjs`;
+        /*
+         * Fetch PDF
+         */
 
-        const pdf = await pdfjs.getDocument({ data }).promise;
-        const dpr = window.devicePixelRatio || 1;
-        const available = Math.min(pages.clientWidth - 32, 900);
+        const response =
+          await fetch(src);
 
-        for (let n = 1; n <= pdf.numPages; n++) {
-          const page = await pdf.getPage(n);
-          const base = page.getViewport({ scale: 1 });
-          const viewport = page.getViewport({ scale: (available / base.width) * dpr });
-
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.floor(viewport.width);
-          canvas.height = Math.floor(viewport.height);
-          canvas.style.width = `${viewport.width / dpr}px`;
-          canvas.style.height = `${viewport.height / dpr}px`;
-          canvas.className = "rounded-md bg-white shadow-lg";
-          pages.appendChild(canvas);
-
-          const ctx = canvas.getContext("2d");
-          if (!ctx) continue;
-
-          await page.render({ canvasContext: ctx, viewport }).promise;
-          status.classList.add("hidden");
+        if (!response.ok) {
+          throw new Error(
+            `NOT_FOUND:${response.status}`
+          );
         }
-      } catch (err) {
-        console.error("[resume preview]", err);
+
+
+        const data =
+          new Uint8Array(
+            await response.arrayBuffer()
+          );
+
+
+        /*
+         * Load PDF.js
+         */
+
+        const pdfjs =
+          await import(
+            /* @vite-ignore */
+            `${PDFJS}/pdf.min.mjs`
+          );
+
+
+        pdfjs.GlobalWorkerOptions.workerSrc =
+          `${PDFJS}/pdf.worker.min.mjs`;
+
+
+        /*
+         * Load document
+         */
+
+        const pdf =
+          await pdfjs
+            .getDocument({
+              data,
+            })
+            .promise;
+
+
+        /*
+         * Calculate display size
+         */
+
+        const dpr =
+          window.devicePixelRatio || 1;
+
+        const available =
+          Math.min(
+            pages.clientWidth - 32,
+            900
+          );
+
+
+        /*
+         * Render every page
+         */
+
+        for (
+          let number = 1;
+          number <= pdf.numPages;
+          number++
+        ) {
+
+          const page =
+            await pdf.getPage(number);
+
+
+          const base =
+            page.getViewport({
+              scale: 1,
+            });
+
+
+          const scale =
+            (available / base.width) *
+            dpr;
+
+
+          const viewport =
+            page.getViewport({
+              scale,
+            });
+
+
+          const canvas =
+            document.createElement(
+              "canvas"
+            );
+
+
+          canvas.width =
+            Math.floor(
+              viewport.width
+            );
+
+          canvas.height =
+            Math.floor(
+              viewport.height
+            );
+
+
+          canvas.style.width =
+            `${viewport.width / dpr}px`;
+
+          canvas.style.height =
+            `${viewport.height / dpr}px`;
+
+
+          canvas.className =
+            "rounded-md bg-white shadow-lg";
+
+
+          pages.appendChild(
+            canvas
+          );
+
+
+          const context =
+            canvas.getContext(
+              "2d"
+            );
+
+
+          if (!context) {
+            continue;
+          }
+
+
+          await page.render({
+            canvasContext:
+              context,
+
+            viewport,
+          }).promise;
+
+
+          status.classList.add(
+            "hidden"
+          );
+        }
+
+      } catch (error) {
+
+        console.error(
+          "[resume preview]",
+          error
+        );
+
+
         started = false;
+
         pages.replaceChildren();
 
-        const notFound = err instanceof Error && err.message.startsWith("NOT_FOUND");
+
+        const notFound =
+          error instanceof Error &&
+          error.message.startsWith(
+            "NOT_FOUND"
+          );
+
+
         showStatus(
           notFound
-            ? `Resume file not found at ${src}. Check that it is in your public folder.`
+            ? `Resume file not found at ${src}. Check that it is inside the public folder.`
             : "Couldn't load the preview. Use the Download button instead."
         );
       }
     };
 
+
+    /*
+     * Open modal
+     */
+
     const open = () => {
+
       dialog.showModal();
-      document.documentElement.style.overflow = "hidden";
+
+      document.documentElement.style.overflow =
+        "hidden";
+
+
       if (!started) {
-        showStatus("Loading resume…");
+
+        showStatus(
+          "Loading resume…"
+        );
+
         render();
       }
     };
 
-    document.querySelectorAll<HTMLElement>("[data-resume-open]").forEach((el) => {
-      el.addEventListener("click", (e) => {
-        e.preventDefault();
-        open();
-      });
-    });
 
-    dialog.querySelector("[data-resume-close]")?.addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", (e) => {
-      if (e.target === dialog) dialog.close();
-    });
-    dialog.addEventListener("close", () => {
-      document.documentElement.style.overflow = "";
-    });
+    /*
+     * Resume buttons
+     */
+
+    document
+      .querySelectorAll<HTMLElement>(
+        "[data-resume-open]"
+      )
+      .forEach((element) => {
+
+        element.addEventListener(
+          "click",
+          (event) => {
+
+            event.preventDefault();
+
+            open();
+          }
+        );
+
+      });
+
+
+    /*
+     * Close button
+     */
+
+    dialog
+      .querySelector(
+        "[data-resume-close]"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          dialog.close();
+        }
+      );
+
+
+    /*
+     * Close when clicking backdrop
+     */
+
+    dialog.addEventListener(
+      "click",
+      (event) => {
+
+        if (
+          event.target === dialog
+        ) {
+          dialog.close();
+        }
+
+      }
+    );
+
+
+    /*
+     * Restore page scrolling
+     */
+
+    dialog.addEventListener(
+      "close",
+      () => {
+
+        document.documentElement.style.overflow =
+          "";
+      }
+    );
   }
 </script>

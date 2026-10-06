@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import Analytics from '@vercel/analytics/astro'
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
   title?: string;
@@ -9,8 +9,7 @@ interface Props {
 
 const {
   title = "Sakthivel",
-  description =
-    "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
+  description = "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
 } = Astro.props;
 ---
 
@@ -19,28 +18,15 @@ const {
   <head>
     <meta charset="UTF-8" />
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <Analytics />
 
-    <meta
-      name="description"
-      content={description}
-    />
+    <meta name="description" content={description} />
 
-    <meta
-      name="theme-color"
-      content="#0a0a0a"
-    />
+    <meta name="theme-color" content="#0a0a0a" />
 
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/favicon.svg"
-    />
+    <link rel="icon" href="/public/favicon.svg" />
 
     <title>{title}</title>
   </head>
