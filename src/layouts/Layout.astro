@@ -9,9 +9,8 @@ interface Props {
 }
 
 const {
-  title = "Sakthivel",
-  description =
-    "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
+  title = "Sakthivel | Full-Stack Developer",
+  description = "Sakthivel is a Full-Stack Developer specializing in Java, Spring Boot, React, TypeScript, and modern web applications.",
 } = Astro.props;
 ---
 
@@ -20,34 +19,50 @@ const {
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sakthivel-d.vercel.app/" />
+    <meta property="og:site_name" content="Sakthivel" />
+
+    <!-- OG Image (Open Graph Image) -->
     <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
+      property="og:image"
+      content="https://sakthivel-d.vercel.app/og-image.png"
     />
 
-    <meta
-      name="description"
-      content={description}
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <meta
-      name="theme-color"
-      content="#0a0a0a"
-    />
+    <meta name="description" content={description} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://sakthivel-d.vercel.app/" />
+
+    <meta name="theme-color" content="#0a0a0a" />
 
     <!-- Favicon -->
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="/favicon.svg?v=4"
-    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" />
 
-    <link
-      rel="shortcut icon"
-      href="/favicon.svg?v=4"
-    />
+    <link rel="shortcut icon" href="/favicon.svg?v=4" />
 
     <title>{title}</title>
+
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: "Sakthivel",
+        url: "https://sakthivel-d.vercel.app/",
+        jobTitle: "Full-Stack Developer",
+        email: "mailto:svel7252@gmail.com",
+        sameAs: [
+          "https://github.com/nameissakthi",
+          "https://linkedin.com/in/sakthiveldhanushkodi",
+        ],
+      })}
+    />
 
     <!-- Vercel -->
     <Analytics />
@@ -93,23 +108,16 @@ const {
             return;
           }
 
-          document.title =
-            glitchFrames[frame];
+          document.title = glitchFrames[frame];
 
           frame++;
 
-          if (
-            frame >=
-            glitchFrames.length
-          ) {
+          if (frame >= glitchFrames.length) {
             if (glitchTimer) {
-              clearInterval(
-                glitchTimer
-              );
+              clearInterval(glitchTimer);
             }
 
-            document.title =
-              originalTitle;
+            document.title = originalTitle;
 
             isGlitching = false;
           }
@@ -118,20 +126,15 @@ const {
 
       const startGlitchTimer = () => {
         if (intervalTimer) {
-          clearInterval(
-            intervalTimer
-          );
+          clearInterval(intervalTimer);
         }
 
         if (!document.hidden) {
-          intervalTimer =
-            window.setInterval(() => {
-              if (
-                !document.hidden
-              ) {
-                glitchTitle();
-              }
-            }, 7000);
+          intervalTimer = window.setInterval(() => {
+            if (!document.hidden) {
+              glitchTitle();
+            }
+          }, 7000);
         }
       };
 
@@ -141,31 +144,23 @@ const {
         }
       }, 1500);
 
-      document.addEventListener(
-        "visibilitychange",
-        () => {
-          if (document.hidden) {
-            if (glitchTimer) {
-              clearInterval(
-                glitchTimer
-              );
-            }
-
-            document.title =
-              originalTitle;
-
-            isGlitching = false;
-
-            if (intervalTimer) {
-              clearInterval(
-                intervalTimer
-              );
-            }
-          } else {
-            startGlitchTimer();
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          if (glitchTimer) {
+            clearInterval(glitchTimer);
           }
+
+          document.title = originalTitle;
+
+          isGlitching = false;
+
+          if (intervalTimer) {
+            clearInterval(intervalTimer);
+          }
+        } else {
+          startGlitchTimer();
         }
-      );
+      });
 
       startGlitchTimer();
     </script>

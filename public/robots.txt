@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sakthivel-d.vercel.app/sitemap-index.xml
