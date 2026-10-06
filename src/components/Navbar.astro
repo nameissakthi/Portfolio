@@ -1,0 +1,152 @@
+---
+import { Menu, X, ArrowUpRight, FileText } from "lucide-astro";
+import ResumeViewer from "./ResumeViewer.astro";
+
+const links = [
+  // { label: "About", href: "#about" },
+  { label: "Experience", href: "#experience" },
+  { label: "Skills", href: "#skills" },
+  { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
+];
+---
+
+<nav class="fixed inset-x-0 top-0 z-50">
+  <!-- Fade so content never collides with the nav -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-x-0 top-0 h-[96px] bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent"
+  >
+  </div>
+
+  <!-- Scroll progress -->
+  <div aria-hidden="true" class="absolute inset-x-0 top-0 h-px">
+    <div id="scroll-progress" class="h-full origin-left scale-x-0 bg-white/70"></div>
+  </div>
+
+  <div class="relative mx-auto flex h-[72px] w-full max-w-[1200px] items-center justify-between px-6">
+    <a href="/" class="text-lg font-medium tracking-[-0.03em] text-[#f5f5f5] no-underline">
+      Sakthivel<span class="text-[#777]">.</span>
+    </a>
+
+    <!-- Desktop pill -->
+    <div
+      class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-[#0a0a0a]/70 p-1 backdrop-blur-xl md:flex"
+    >
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            data-nav-link
+            class="rounded-full px-4 py-2 text-sm text-[#888] no-underline transition-colors duration-200 hover:text-[#f5f5f5] data-[active=true]:bg-white/10 data-[active=true]:text-[#f5f5f5]"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <button
+      type="button"
+      data-resume-open
+      aria-haspopup="dialog"
+      class="hidden cursor-pointer items-center gap-1.5 rounded-full border-0 bg-[#f5f5f5] px-4 py-2 text-sm font-medium text-[#0a0a0a] transition-transform duration-200 hover:-translate-y-0.5 md:inline-flex"
+    >
+      Resume
+      <FileText class="h-3.5 w-3.5" />
+    </button>
+
+    <!-- Mobile button -->
+    <button
+      id="menu-button"
+      type="button"
+      aria-label="Toggle navigation"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#0a0a0a]/70 text-[#f5f5f5] backdrop-blur-xl md:hidden"
+    >
+      <Menu id="menu-open" class="h-5 w-5" />
+      <X id="menu-close" class="hidden h-5 w-5" />
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div
+    id="mobile-menu"
+    class="relative hidden border-t border-white/5 bg-[#0a0a0a]/95 px-6 pb-8 pt-2 backdrop-blur-xl md:hidden"
+  >
+    {
+      links.map((link) => (
+        <a
+          href={link.href}
+          data-nav-link
+          class="flex items-center justify-between border-b border-white/5 py-5 text-2xl font-medium tracking-[-0.03em] text-[#888] no-underline data-[active=true]:text-[#f5f5f5]"
+        >
+          {link.label}
+          <ArrowUpRight class="h-5 w-5 text-[#555]" />
+        </a>
+      ))
+    }
+
+    <button
+      type="button"
+      data-resume-open
+      aria-haspopup="dialog"
+      class="mt-6 inline-flex cursor-pointer items-center gap-2 rounded-full border-0 bg-[#f5f5f5] px-5 py-3 text-sm font-medium text-[#0a0a0a]"
+    >
+      Resume
+      <FileText class="h-4 w-4" />
+    </button>
+  </div>
+</nav>
+
+<ResumeViewer />
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("#menu-button");
+  const menu = document.querySelector<HTMLElement>("#mobile-menu");
+  const openIcon = document.querySelector<HTMLElement>("#menu-open");
+  const closeIcon = document.querySelector<HTMLElement>("#menu-close");
+
+  const setOpen = (open: boolean) => {
+    button?.setAttribute("aria-expanded", String(open));
+    menu?.classList.toggle("hidden", !open);
+    openIcon?.classList.toggle("hidden", open);
+    closeIcon?.classList.toggle("hidden", !open);
+  };
+
+  button?.addEventListener("click", () => {
+    setOpen(button.getAttribute("aria-expanded") !== "true");
+  });
+
+  menu?.querySelectorAll("a, [data-resume-open]").forEach((a) => a.addEventListener("click", () => setOpen(false)));
+
+  // Active section highlight
+  const navLinks = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        navLinks.forEach((link) => {
+          link.dataset.active = String(link.getAttribute("href") === `#${entry.target.id}`);
+        });
+      });
+    },
+    { rootMargin: "-45% 0px -50% 0px" }
+  );
+
+  navLinks.forEach((link) => {
+    const target = document.querySelector(link.getAttribute("href") ?? "");
+    if (target) observer.observe(target);
+  });
+
+  // Scroll progress
+  const bar = document.querySelector<HTMLElement>("#scroll-progress");
+  const onScroll = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const p = max > 0 ? window.scrollY / max : 0;
+    if (bar) bar.style.transform = `scaleX(${p})`;
+  };
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+</script>

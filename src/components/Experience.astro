@@ -1,0 +1,131 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+import { experience } from "../../data/details";
+
+/* Used only when an experience item has no `stack` array of its own. */
+const fallbackStack = [
+  ["Java", "Spring Boot", "TypeScript", "Microservices"],
+  ["React", "Node.js", "Express.js", "MongoDB"],
+  ["HTML", "CSS", "JavaScript"],
+];
+---
+
+<section id="experience" class="bg-[#0a0a0a] px-6 py-24 text-[#f5f5f5]">
+  <div class="mx-auto w-full max-w-[1200px]">
+    <SectionHeader>
+      Where I've<br />worked.
+    </SectionHeader>
+
+    <div data-timeline class="relative">
+      <!-- Track + fill (the fill grows as you scroll) -->
+      <div
+        class="absolute bottom-0 left-[7px] top-2 w-px bg-[#232323] md:left-[207px]"
+        aria-hidden="true"
+      >
+        <div
+          data-fill
+          class="h-0 w-full bg-gradient-to-b from-white to-white/30 shadow-[0_0_12px_rgba(255,255,255,0.5)]"
+        >
+        </div>
+      </div>
+
+      {
+        experience.map((item, index) => (
+          <article
+            data-item
+            class="tl-item relative grid gap-2 pb-16 pl-10 last:pb-0 md:grid-cols-[200px_1fr] md:gap-0 md:pl-0"
+          >
+            <!-- Node -->
+            <span
+              class="tl-node absolute left-0 top-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-[#444] bg-[#0a0a0a] md:left-[200px]"
+            >
+              <span class="tl-dot h-1.5 w-1.5 rounded-full bg-[#666]" />
+            </span>
+
+            <!-- Period -->
+            <p class="m-0 pt-1 text-sm text-[#777] md:pr-10 md:text-right">{item.period}</p>
+
+            <!-- Content -->
+            <div class="md:pl-12">
+              <h3
+                class="m-0 text-[clamp(1.75rem,3.2vw,2.6rem)] font-medium leading-[1.05] tracking-[-0.045em]"
+              >
+                {item.company}
+              </h3>
+
+              <p class="m-0 mt-2 text-[15px] text-[#888]">{item.role}</p>
+
+              <ul class="m-0 mt-6 flex list-none flex-wrap gap-2 p-0">
+                {(item.stack ?? fallbackStack[index] ?? []).map((tech: string) => (
+                  <li class="rounded-full border border-[#232323] px-3 py-1.5 text-xs text-[#999]">
+                    {tech}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .tl-item {
+    opacity: 0.35;
+    transition: opacity 400ms ease;
+  }
+
+  .tl-item.is-on {
+    opacity: 1;
+  }
+
+  .tl-node,
+  .tl-dot {
+    transition:
+      border-color 300ms ease,
+      background-color 300ms ease,
+      box-shadow 300ms ease;
+  }
+
+  .tl-item.is-on .tl-node {
+    border-color: #f5f5f5;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  }
+
+  .tl-item.is-on .tl-dot {
+    background-color: #f5f5f5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tl-item,
+    .tl-node,
+    .tl-dot {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const timeline = document.querySelector<HTMLElement>("[data-timeline]");
+
+  if (timeline) {
+    const fill = timeline.querySelector<HTMLElement>("[data-fill]");
+    const items = Array.from(timeline.querySelectorAll<HTMLElement>("[data-item]"));
+
+    const update = () => {
+      const mark = window.innerHeight * 0.6;
+      const rect = timeline.getBoundingClientRect();
+      const progress = Math.min(Math.max(mark - rect.top, 0), rect.height);
+
+      if (fill) fill.style.height = `${progress}px`;
+      items.forEach((item) => {
+        item.classList.toggle("is-on", item.getBoundingClientRect().top < mark);
+      });
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+  }
+</script>

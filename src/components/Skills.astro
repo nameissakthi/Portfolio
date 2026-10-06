@@ -1,0 +1,174 @@
+---
+import { skillGroups, ICON_BASE } from "../../data/skills";
+
+/*
+  Bento layout: each group gets a column span on desktop (6-col grid).
+  Classes are written out in full so Tailwind can see them.
+  Order: group 1 + 2 share the top row, groups 3 + 4 + 5 share the second.
+  Add or remove entries to match the number of groups you have.
+*/
+const spans = [
+  "md:col-span-3",
+  "md:col-span-3",
+  "md:col-span-2",
+  "md:col-span-2",
+  "md:col-span-2",
+];
+
+const total = skillGroups.reduce((n, g) => n + g.skills.length, 0);
+---
+
+<section id="skills" class="relative overflow-hidden bg-[#0a0a0a] px-6 py-24 text-[#f5f5f5]">
+  <!-- soft light behind the heading -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -top-40 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]"
+  >
+  </div>
+
+  <div class="relative mx-auto w-full max-w-[1050px]">
+    <!-- Header -->
+    <header class="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <h2
+        class="m-0 text-[clamp(2.6rem,6.5vw,5rem)] font-medium leading-[0.95] tracking-[-0.05em]"
+      >
+        What I<br />build with.
+      </h2>
+
+      <p class="m-0 max-w-[300px] text-sm leading-relaxed text-[#6f6f6f]">
+        {total} tools across {skillGroups.length} areas, from the database to the browser.
+      </p>
+    </header>
+
+    <!-- Bento grid -->
+    <div data-spot-grid class="grid grid-cols-1 gap-3 md:grid-cols-6">
+      {
+        skillGroups.map((group, i) => (
+          <div
+            data-spot-card
+            class={`spot-card group/card relative rounded-2xl border border-[#1c1c1c] bg-[#0e0e0e] p-6 ${spans[i] ?? "md:col-span-2"}`}
+          >
+            <h3 class="m-0 mb-5 text-lg font-medium leading-[1.2] tracking-[-0.02em]">
+              {group.title}
+              <span class="ml-2 text-sm font-normal text-[#555]">{group.skills.length}</span>
+            </h3>
+
+            <ul class="relative z-10 m-0 flex list-none flex-wrap gap-2 p-0">
+              {group.skills.map((skill) => {
+                const Icon = skill.lucide;
+
+                return (
+                  <li
+                    class="skill-tile group/skill inline-flex cursor-default items-center gap-3 rounded-xl border border-[#242424] bg-[#131313] px-4 py-3 transition duration-200 hover:-translate-y-0.5"
+                    style={`--brand: ${skill.color}`}
+                  >
+                    {Icon ? (
+                      <Icon
+                        class="h-6 w-6 shrink-0 text-[#7a7a7a] transition-colors duration-200 group-hover/skill:text-[var(--brand)]"
+                        stroke-width="1.5"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <span
+                        class="h-6 w-6 shrink-0 bg-[#7a7a7a] transition-colors duration-200 group-hover/skill:bg-[var(--brand)]"
+                        style={`mask: url(${ICON_BASE}/${skill.slug}.svg) center / contain no-repeat; -webkit-mask: url(${ICON_BASE}/${skill.slug}.svg) center / contain no-repeat;`}
+                        aria-hidden="true"
+                      />
+                    )}
+
+                    <span class="whitespace-nowrap text-[15px] font-medium tracking-[-0.01em] text-[#c4c4c4] transition-colors duration-200 group-hover/skill:text-white">
+                      {skill.name}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /*
+    Cursor spotlight: a light follows the pointer across the whole grid.
+    - ::before draws a glowing 1px border where the light touches the card
+    - ::after adds a faint fill under the light
+    --mx / --my are set per card by the script below.
+  */
+  .spot-card::before,
+  .spot-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .spot-card::before {
+    padding: 1px;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.65),
+      transparent 65%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .spot-card::after {
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.05),
+      transparent 70%
+    );
+  }
+
+  /* Only light up on devices that actually hover */
+  @media (hover: hover) {
+    [data-spot-grid]:hover .spot-card::before,
+    [data-spot-grid]:hover .spot-card::after {
+      opacity: 1;
+    }
+  }
+
+  /* Tile glows in its own brand colour on hover */
+  .skill-tile:hover {
+    border-color: color-mix(in srgb, var(--brand) 60%, #242424);
+    background: color-mix(in srgb, var(--brand) 9%, #131313);
+    box-shadow: 0 8px 28px -12px var(--brand);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spot-card::before,
+    .spot-card::after,
+    .skill-tile {
+      transition: none;
+    }
+    .skill-tile:hover {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-spot-grid]").forEach((grid) => {
+    const cards = grid.querySelectorAll<HTMLElement>("[data-spot-card]");
+
+    grid.addEventListener("pointermove", (e) => {
+      cards.forEach((card) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    });
+  });
+</script>

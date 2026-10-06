@@ -1,0 +1,191 @@
+---
+import { ArrowUpRight, Github, Linkedin, Mail, Copy } from "lucide-astro";
+import { personal } from "../../data/details";
+
+const channels = [
+  {
+    label: "Email",
+    value: personal.email,
+    href: `mailto:${personal.email}`,
+    Icon: Mail,
+    external: false,
+  },
+  {
+    label: "GitHub",
+    value: "@nameissakthi",
+    href: personal.github,
+    Icon: Github,
+    external: true,
+  },
+  {
+    label: "LinkedIn",
+    value: "@sakthiveldhanushkodi",
+    href: personal.linkedin,
+    Icon: Linkedin,
+    external: true,
+  },
+];
+---
+
+<section id="contact" class="relative overflow-hidden bg-[#0a0a0a] px-6 pt-24 text-[#f5f5f5]">
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute left-1/2 top-10 h-[380px] w-[760px] -translate-x-1/2 rounded-full bg-white/[0.04] blur-[120px]"
+  >
+  </div>
+
+  <div class="relative mx-auto w-full max-w-[1200px]">
+    <!-- CTA -->
+    <div class="flex flex-col items-center pb-20 text-center">
+      <h2
+        class="m-0 max-w-[900px] text-[clamp(2.6rem,7vw,5.5rem)] font-medium leading-[0.98] tracking-[-0.055em]"
+      >
+        Let's build. Let's learn.<br />
+        Let's create.
+      </h2>
+
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <a
+          href={`mailto:${personal.email}`}
+          class="group inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-6 py-3.5 text-sm font-medium text-[#0a0a0a] no-underline transition-transform duration-200 hover:-translate-y-0.5"
+        >
+          Get in touch
+          <ArrowUpRight
+            class="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          />
+        </a>
+
+        <button
+          type="button"
+          data-copy
+          data-email={personal.email}
+          class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#303030] bg-transparent px-6 py-3.5 text-sm font-medium text-[#c4c4c4] transition-colors duration-200 hover:border-[#666] hover:text-[#f5f5f5]"
+        >
+          <Copy class="h-4 w-4" />
+          <span data-label>Copy email</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Channels -->
+    <div data-spot-grid class="grid grid-cols-1 gap-3 md:grid-cols-3">
+      {
+        channels.map(({ label, value, href, Icon, external }) => (
+          <a
+            href={href}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            data-spot-card
+            class="spot-card group relative flex min-h-[170px] flex-col justify-between rounded-2xl border border-[#1c1c1c] bg-[#0e0e0e] p-6 text-[#f5f5f5] no-underline"
+          >
+            <div class="relative z-10 flex items-start justify-between">
+              <span class="flex h-10 w-10 items-center justify-center rounded-full border border-[#242424] bg-[#131313] text-[#999] transition-colors duration-200 group-hover:text-[#f5f5f5]">
+                <Icon class="h-[18px] w-[18px]" stroke-width="1.5" />
+              </span>
+
+              <ArrowUpRight
+                class="h-5 w-5 text-[#444] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#f5f5f5]"
+              />
+            </div>
+
+            <div class="relative z-10 min-w-0">
+              <p class="m-0 text-sm text-[#666]">{label}</p>
+              <p class="m-0 mt-1 truncate text-lg font-medium tracking-[-0.02em] text-[#e5e5e5]">
+                {value}
+              </p>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+
+    <footer class="relative mt-20 flex items-center justify-between border-t border-[#232323] pb-8 pt-6 text-xs text-[#555]">
+      <span>© {new Date().getFullYear()} Sakthivel</span>
+      <a href="#top" class="text-[#555] no-underline transition-colors hover:text-[#f5f5f5]">
+        Back to top
+      </a>
+    </footer>
+  </div>
+</section>
+
+<style>
+  /* Cursor spotlight, same treatment as the skills grid */
+  .spot-card::before,
+  .spot-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .spot-card::before {
+    padding: 1px;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.65),
+      transparent 65%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .spot-card::after {
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.05),
+      transparent 70%
+    );
+  }
+
+  @media (hover: hover) {
+    [data-spot-grid]:hover .spot-card::before,
+    [data-spot-grid]:hover .spot-card::after {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spot-card::before,
+    .spot-card::after {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-spot-grid]").forEach((grid) => {
+    const cards = grid.querySelectorAll<HTMLElement>("[data-spot-card]");
+
+    grid.addEventListener("pointermove", (e) => {
+      cards.forEach((card) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    });
+  });
+
+  const copyButton = document.querySelector<HTMLButtonElement>("[data-copy]");
+
+  copyButton?.addEventListener("click", async () => {
+    const label = copyButton.querySelector<HTMLElement>("[data-label]");
+
+    try {
+      await navigator.clipboard.writeText(copyButton.dataset.email ?? "");
+      if (label) {
+        label.textContent = "Copied";
+        setTimeout(() => (label.textContent = "Copy email"), 1600);
+      }
+    } catch {
+      if (label) label.textContent = "Copy failed";
+    }
+  });
+</script>

@@ -1,0 +1,218 @@
+---
+import { ArrowUpRight, ArrowDown, Github } from "lucide-astro";
+import { personal } from "../../data/details";
+import { ICON_BASE } from "../../data/skills";
+
+/* Orbiting tech: each ring spins, each icon counter-spins so it stays upright. */
+const rings = [
+  {
+    size: 440,
+    duration: 90,
+    reverse: false,
+    icons: [
+      { slug: "react", angle: 20 },
+      { slug: "springboot", angle: 110 },
+      { slug: "typescript", angle: 200 },
+      { slug: "docker", angle: 290 },
+    ],
+  },
+  {
+    size: 300,
+    duration: 60,
+    reverse: true,
+    icons: [
+      { slug: "nodedotjs", angle: 60 },
+      { slug: "mongodb", angle: 180 },
+      { slug: "mysql", angle: 300 },
+    ],
+  },
+  { size: 190, duration: 0, reverse: false, icons: [] },
+];
+---
+
+<section
+  data-hero
+  class="relative min-h-screen overflow-hidden bg-[#0a0a0a] px-6 pt-[72px] lg:pt-2 text-[#f5f5f5]"
+>
+  <!-- Dot grid, brightened around the cursor -->
+  <div aria-hidden="true" class="dots-base pointer-events-none absolute inset-0"></div>
+  <div aria-hidden="true" class="dots-lit pointer-events-none absolute inset-0"></div>
+
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute right-[-120px] top-[15%] h-[500px] w-[500px] rounded-full bg-white/[0.03] blur-[120px]"
+  >
+  </div>
+
+  <div class="relative mx-auto flex min-h-[calc(100vh-72px)] w-full max-w-[1200px] items-center">
+    <div class="grid w-full gap-16 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <!-- Left -->
+      <div>
+        <p class="mb-6 text-sm text-[#777]">Hello, I'm</p>
+
+        <h1
+          class="m-0 text-[clamp(4rem,11vw,9rem)] font-medium leading-[0.86] tracking-[-0.075em]"
+        >
+          {personal.name}<span class="text-[#444]">.</span>
+        </h1>
+
+        <p
+          class="mt-8 max-w-[650px] text-[clamp(1.4rem,3vw,2.25rem)] font-light leading-[1.15] tracking-[-0.04em] text-[#c8c8c8]"
+        >
+          {personal.role}
+        </p>
+
+        <p class="mt-5 max-w-[540px] text-base leading-7 text-[#777]">
+          {personal.shortIntro}
+        </p>
+
+        <div class="mt-9 flex flex-wrap items-center gap-3">
+          <a
+            href="#projects"
+            class="group inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-5 py-3 text-sm font-medium text-[#0a0a0a] no-underline transition-transform duration-200 hover:-translate-y-0.5"
+          >
+            View my work
+            <ArrowUpRight
+              class="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
+          </a>
+
+          <a
+            href={personal.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 rounded-full border border-[#303030] px-5 py-3 text-sm font-medium text-[#c4c4c4] no-underline transition-colors duration-200 hover:border-[#666] hover:text-[#f5f5f5]"
+          >
+            <Github class="h-4 w-4" />
+            GitHub
+          </a>
+        </div>
+
+        <!-- Meta -->
+        <dl class="m-0 mt-16 grid max-w-[600px] grid-cols-3 gap-4 border-t border-[#232323] pt-5">
+          <div>
+            <dt class="text-xs text-[#555]">Based in</dt>
+            <dd class="m-0 mt-2 text-sm text-[#aaa]">{personal.location}</dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-[#555]">Focus</dt>
+            <dd class="m-0 mt-2 text-sm text-[#aaa]">Full-stack</dd>
+          </div>
+
+          <div>
+            <dt class="text-xs text-[#555]">Status</dt>
+            <dd class="m-0 mt-2 flex items-center gap-2 text-sm text-[#aaa]">
+              <span class="relative flex h-2 w-2">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+              </span>
+              Available
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Right: orbit -->
+      <div
+        aria-hidden="true"
+        class="relative hidden min-h-[520px] items-center justify-center lg:flex"
+      >
+        {
+          rings.map((ring) => (
+            <div
+              class:list={["absolute rounded-full border border-white/[0.08]", ring.duration && "orbit"]}
+              style={`width:${ring.size}px;height:${ring.size}px;--d:${ring.duration}s;--dir:${ring.reverse ? "reverse" : "normal"};--inv:${ring.reverse ? "normal" : "reverse"}`}
+            >
+              {ring.icons.map((icon) => (
+                <div
+                  class="absolute left-1/2 top-1/2 h-0 w-0"
+                  style={`transform:rotate(${icon.angle}deg) translateY(-${ring.size / 2}px)`}
+                >
+                  <div style={`transform:rotate(-${icon.angle}deg)`}>
+                    <div class="counter">
+                      <span class="absolute -left-5 -top-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-[#111]">
+                        <span
+                          class="h-[18px] w-[18px] bg-[#9a9a9a]"
+                          style={`mask:url(${ICON_BASE}/${icon.slug}.svg) center / contain no-repeat;-webkit-mask:url(${ICON_BASE}/${icon.slug}.svg) center / contain no-repeat;`}
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        }
+
+        <div
+          class="relative z-10 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-white/[0.12] bg-[#0a0a0a] text-[17px] font-light text-[#ddd] shadow-[0_0_80px_-10px_rgba(255,255,255,0.18)]"
+        >
+          <!-- வணக்கம் -->
+        </div>
+      </div>
+    </div>
+
+    <a
+      href="#experience"
+      class="absolute bottom-8 left-0 hidden items-center gap-2 text-xs text-[#555] no-underline transition-colors hover:text-[#aaa] sm:flex"
+    >
+      Scroll to explore
+      <ArrowDown class="h-3.5 w-3.5" />
+    </a>
+  </div>
+</section>
+
+<style>
+  .dots-base {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.2px);
+    background-size: 28px 28px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+
+  .dots-lit {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.85) 1px, transparent 1.4px);
+    background-size: 28px 28px;
+    -webkit-mask-image: radial-gradient(230px circle at var(--mx, -999px) var(--my, -999px), #000, transparent);
+    mask-image: radial-gradient(230px circle at var(--mx, -999px) var(--my, -999px), #000, transparent);
+  }
+
+  .orbit {
+    animation: spin var(--d) linear infinite;
+    animation-direction: var(--dir);
+  }
+
+  .counter {
+    animation: spin var(--d) linear infinite;
+    animation-direction: var(--inv);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit,
+    .counter {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+
+  hero?.addEventListener("pointermove", (e) => {
+    const r = hero.getBoundingClientRect();
+    hero.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    hero.style.setProperty("--my", `${e.clientY - r.top}px`);
+  });
+
+  hero?.addEventListener("pointerleave", () => {
+    hero.style.removeProperty("--mx");
+    hero.style.removeProperty("--my");
+  });
+</script>

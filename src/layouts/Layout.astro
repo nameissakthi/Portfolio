@@ -1,0 +1,146 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Sakthivel",
+  description =
+    "Portfolio of Sakthivel, a Full-Stack Developer focused on building modern web applications and backend systems.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+
+    <meta
+      name="description"
+      content={description}
+    />
+
+    <meta
+      name="theme-color"
+      content="#0a0a0a"
+    />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
+
+    <title>{title}</title>
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>
+
+<script>
+  const originalTitle = "Sakthivel";
+
+  const glitchFrames = [
+    "Sakthive_",
+    "Sakthiv3l",
+    "Sakth!vel",
+    "Sakth1vel",
+    "Sakthivel",
+  ];
+
+  let isGlitching = false;
+  let glitchTimer: number | undefined;
+  let intervalTimer: number | undefined;
+
+  const glitchTitle = () => {
+    // Don't run when the tab is inactive
+    if (document.hidden || isGlitching) return;
+
+    isGlitching = true;
+
+    let frame = 0;
+
+    glitchTimer = window.setInterval(() => {
+      // Stop immediately if the user switches tabs
+      if (document.hidden) {
+        if (glitchTimer) {
+          clearInterval(glitchTimer);
+        }
+
+        document.title = originalTitle;
+        isGlitching = false;
+        return;
+      }
+
+      document.title = glitchFrames[frame];
+
+      frame++;
+
+      if (frame >= glitchFrames.length) {
+        if (glitchTimer) {
+          clearInterval(glitchTimer);
+        }
+
+        document.title = originalTitle;
+        isGlitching = false;
+      }
+    }, 90);
+  };
+
+  const startGlitchTimer = () => {
+    // Clear existing timer
+    if (intervalTimer) {
+      clearInterval(intervalTimer);
+    }
+
+    // Only schedule glitches when the tab is active
+    if (!document.hidden) {
+      intervalTimer = window.setInterval(() => {
+        if (!document.hidden) {
+          glitchTitle();
+        }
+      }, 7000);
+    }
+  };
+
+  // Run once after the page loads
+  window.setTimeout(() => {
+    if (!document.hidden) {
+      glitchTitle();
+    }
+  }, 1500);
+
+  // Detect tab switching
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      // Stop any running glitch
+      if (glitchTimer) {
+        clearInterval(glitchTimer);
+      }
+
+      document.title = originalTitle;
+      isGlitching = false;
+
+      // Stop the recurring timer
+      if (intervalTimer) {
+        clearInterval(intervalTimer);
+      }
+    } else {
+      // User came back to the tab
+      startGlitchTimer();
+    }
+  });
+
+  // Start recurring timer
+  startGlitchTimer();
+</script>
