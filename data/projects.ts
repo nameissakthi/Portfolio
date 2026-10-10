@@ -53,6 +53,23 @@ export const projects: Project[] = [
   },
 
   {
+    title: "My Diary",
+    category: "React · Spring Boot",
+    type: "web",
+    description:
+      "Diary web app is simple diary create using react js and spring boot. Your daily memory storage hub",
+    technologies: [
+      "React",
+      "Clerk Auth",
+      "Spring boot",
+      "Docker"
+    ],
+    image: "/projects/project3.png",
+    liveUrl: "https://my-diary-web.vercel.app/",
+    githubUrl: "https://github.com/nameissakthi/Diary-Web-App",
+  },
+
+  {
     title: "IsaiVault",
     category: "Music Player - Mobile Application",
     type: "mobile",
@@ -67,8 +84,8 @@ export const projects: Project[] = [
       "Google Drive API",
       "Google Sign In",
     ],
-    image: "/projects/project3.png",
-    // demoUrl: "https://...",
+    image: "/projects/project4.png",
+    demoUrl: "https://...",
     // downloadUrl: "https://...",
     githubUrl: "https://github.com/nameissakthi/isaivault",
   },

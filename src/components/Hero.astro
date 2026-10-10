@@ -26,7 +26,16 @@ const rings = [
       { slug: "mysql", angle: 300 },
     ],
   },
-  { size: 190, duration: 0, reverse: false, icons: [] },
+  {
+    size: 190,
+    duration: 30,
+    reverse: false,
+    icons: [
+      { slug: "git", angle: 110 },
+      { slug: "postman", angle: 240 },
+      { slug: "tailwindcss", angle: 350 },
+    ],
+  },
 ];
 ---
 
@@ -35,13 +44,8 @@ const rings = [
   class="relative min-h-screen overflow-hidden bg-[#0a0a0a] px-6 pt-[72px] lg:pt-2 text-[#f5f5f5]"
 >
   <!-- Dot grid, brightened around the cursor -->
-  <div
-    aria-hidden="true"
-    class="dots-base pointer-events-none absolute inset-0"
-  >
-  </div>
-  <div aria-hidden="true" class="dots-lit pointer-events-none absolute inset-0">
-  </div>
+  <div aria-hidden="true" class="dots-base pointer-events-none absolute inset-0"></div>
+  <div aria-hidden="true" class="dots-lit pointer-events-none absolute inset-0"></div>
 
   <div
     aria-hidden="true"
@@ -49,12 +53,8 @@ const rings = [
   >
   </div>
 
-  <div
-    class="relative mx-auto flex min-h-[calc(100vh-72px)] w-full max-w-[1200px] items-center"
-  >
-    <div
-      class="grid w-full gap-16 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center"
-    >
+  <div class="relative mx-auto flex min-h-[calc(100vh-72px)] w-full max-w-[1200px] items-center">
+    <div class="grid w-full gap-16 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
       <!-- Left -->
       <div>
         <p class="mb-6 text-sm text-[#777]">Hello, I'm</p>
@@ -98,9 +98,7 @@ const rings = [
         </div>
 
         <!-- Meta -->
-        <dl
-          class="m-0 mt-16 grid max-w-[600px] grid-cols-3 gap-4 border-t border-[#232323] pt-5"
-        >
+        <dl class="m-0 mt-16 grid max-w-[600px] grid-cols-3 gap-4 border-t border-[#232323] pt-5">
           <div>
             <dt class="text-xs text-[#555]">Based in</dt>
             <dd class="m-0 mt-2 text-sm text-[#aaa]">{personal.location}</dd>
@@ -115,12 +113,8 @@ const rings = [
             <dt class="text-xs text-[#555]">Status</dt>
             <dd class="m-0 mt-2 flex items-center gap-2 text-sm text-[#aaa]">
               <span class="relative flex h-2 w-2">
-                <span
-                  class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"
-                ></span>
-                <span
-                  class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"
-                ></span>
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
               </span>
               Available
             </dd>
@@ -136,10 +130,7 @@ const rings = [
         {
           rings.map((ring) => (
             <div
-              class:list={[
-                "absolute rounded-full border border-white/[0.08]",
-                ring.duration && "orbit",
-              ]}
+              class:list={["absolute rounded-full border border-white/[0.08]", ring.duration && "orbit"]}
               style={`width:${ring.size}px;height:${ring.size}px;--d:${ring.duration}s;--dir:${ring.reverse ? "reverse" : "normal"};--inv:${ring.reverse ? "normal" : "reverse"}`}
             >
               {ring.icons.map((icon) => (
@@ -163,10 +154,61 @@ const rings = [
           ))
         }
 
+        <!-- Centre: Omnitrix-style dial (turns half a revolution when hovered) -->
         <div
-          class="relative z-10 flex h-[120px] w-[120px] items-center justify-center rounded-full border border-white/[0.12] bg-[#0a0a0a] text-[17px] font-light text-[#ddd] shadow-[0_0_80px_-10px_rgba(255,255,255,0.18)]"
+          class="group relative z-10 h-[128px] w-[128px] rounded-full shadow-[0_0_80px_-10px_rgba(255,255,255,0.18)]"
         >
-          <!-- வணக்கம் -->
+          <svg
+            viewBox="0 0 200 200"
+            fill="none"
+            class="omnitrix h-full w-full transition-transform duration-700 ease-out group-hover:rotate-180"
+          >
+            <!-- Body -->
+            <circle cx="100" cy="100" r="98" class="om-base"></circle>
+
+            <!-- Outer ring: 8 segments -->
+            <circle
+              cx="100"
+              cy="100"
+              r="86"
+              class="om-seg"
+              stroke-width="11"
+              stroke-dasharray="62.54 5"
+              transform="rotate(-88.33 100 100)"></circle>
+
+            <!-- Middle ring: 4 segments with two bright arcs -->
+            <!-- <circle
+              cx="100"
+              cy="100"
+              r="68"
+              class="om-mid"
+              stroke-width="13"
+              stroke-dasharray="101.8 5"
+              transform="rotate(-87.9 100 100)"></circle>
+            <circle
+              cx="100"
+              cy="100"
+              r="68"
+              class="om-hi"
+              stroke-width="13"
+              stroke-dasharray="40 387.3"
+              transform="rotate(-68 100 100)"></circle>
+            <circle
+              cx="100"
+              cy="100"
+              r="68"
+              class="om-hi"
+              stroke-width="13"
+              stroke-dasharray="40 387.3"
+              transform="rotate(112 100 100)"></circle> -->
+
+            <!-- Inner disc + hourglass -->
+            <circle cx="100" cy="100" r="58" class="om-base om-inner"></circle>
+            <path
+              class="om-core"
+              d="M 68.9 68.9 A 44 44 0 0 1 131.1 68.9 L 105 100 L 131.1 131.1 A 44 44 0 0 1 68.9 131.1 L 95 100 Z"
+            ></path>
+          </svg>
         </div>
       </div>
     </div>
@@ -183,31 +225,57 @@ const rings = [
 
 <style>
   .dots-base {
-    background-image: radial-gradient(
-      rgba(255, 255, 255, 0.16) 1px,
-      transparent 1.2px
-    );
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.2px);
     background-size: 28px 28px;
     -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
     mask-image: linear-gradient(to bottom, #000 55%, transparent);
   }
 
   .dots-lit {
-    background-image: radial-gradient(
-      rgba(255, 255, 255, 0.85) 1px,
-      transparent 1.4px
-    );
+    background-image: radial-gradient(rgba(255, 255, 255, 0.85) 1px, transparent 1.4px);
     background-size: 28px 28px;
-    -webkit-mask-image: radial-gradient(
-      230px circle at var(--mx, -999px) var(--my, -999px),
-      #000,
-      transparent
-    );
-    mask-image: radial-gradient(
-      230px circle at var(--mx, -999px) var(--my, -999px),
-      #000,
-      transparent
-    );
+    -webkit-mask-image: radial-gradient(230px circle at var(--mx, -999px) var(--my, -999px), #000, transparent);
+    mask-image: radial-gradient(230px circle at var(--mx, -999px) var(--my, -999px), #000, transparent);
+  }
+
+  /*
+    Omnitrix colours. Change these to restyle the dial,
+    e.g. --core: #9bd33d and --seg: #4caf50 for the classic green.
+  */
+  .omnitrix {
+    --bg: #060606;
+    --seg: #bdbdbd;
+    --mid: #2c2c2c;
+    --hi: #ececec;
+    --core: #f2f2f2;
+  }
+
+  .om-base {
+    fill: var(--bg);
+    stroke: rgba(255, 255, 255, 0.14);
+    stroke-width: 1;
+  }
+
+  .om-inner {
+    stroke: rgba(255, 255, 255, 0.06);
+  }
+
+  .om-seg {
+    stroke: var(--seg);
+    opacity: 0.85;
+  }
+
+  .om-mid {
+    stroke: var(--mid);
+  }
+
+  .om-hi {
+    stroke: var(--hi);
+  }
+
+  .om-core {
+    fill: var(--core);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
   }
 
   .orbit {
@@ -230,6 +298,10 @@ const rings = [
     .orbit,
     .counter {
       animation-duration: calc(var(--d) * 3);
+    }
+
+    .omnitrix {
+      transition: none;
     }
   }
 </style>
