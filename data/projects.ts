@@ -85,7 +85,7 @@ export const projects: Project[] = [
       "Google Sign In",
     ],
     image: "/projects/project4.png",
-    demoUrl: "https://...",
+    demoUrl: "https://drive.google.com/file/d/1q3AO55UjuB9VYGv3eTTxbR8PNat0q6fw/view?usp=drive_link",
     // downloadUrl: "https://...",
     githubUrl: "https://github.com/nameissakthi/isaivault",
   },
