@@ -1,0 +1,479 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Copy, X } from "lucide-astro";
+import SectionHeader from "./SectionHeader.astro";
+import { certificates } from "../../data/certificate";
+
+/* Letters for the seal when there is no logo, e.g. "Microsoft and LinkedIn" -> "ML" */
+const stop = new Set(["and", "of", "the", "in", "for", "to", "a", "&"]);
+const initials = (text: string) =>
+  text
+    .split(/\s+/)
+    .filter((word) => /^[a-z0-9]/i.test(word) && !stop.has(word.toLowerCase()))
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join("") || "C";
+
+/*
+  Optimised images: keep the certificate pictures in src/assets/certificates/ with the
+  same file names used in certificate.ts. If a file isn't found there, it falls back
+  to the path in /public (works, but isn't optimised).
+*/
+const localImages = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/certificates/*.{png,jpg,jpeg,webp,avif}",
+  { eager: true }
+);
+
+const resolveImage = (path: string) => {
+  const file = path.split("/").pop() ?? "";
+  return localImages[`/src/assets/certificates/${file}`]?.default;
+};
+---
+
+{
+  certificates.length > 0 && (
+    <section id="certifications" class="bg-[#0a0a0a] px-6 py-24 text-[#f5f5f5]">
+      <div class="mx-auto w-full max-w-[1200px]">
+        <SectionHeader>
+          Things I've<br />learned.
+        </SectionHeader>
+
+        <!-- Compact cards: only name, issuer and date -->
+        <div data-spot-grid class="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {certificates.map((cert, i) => (
+            <button
+              type="button"
+              data-spot-card
+              data-cert-open={i}
+              class="spot-card group relative flex w-full cursor-pointer items-center gap-4 rounded-2xl border border-[#1c1c1c] bg-[#0e0e0e] p-8 text-left text-[#f5f5f5]"
+            >
+              <span class="seal relative z-10 shrink-0 rounded-full p-px">
+                <span class="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#111] text-[13px] font-medium tracking-wide text-[#bbb]">
+                  {initials(cert.issuer || cert.title)}
+                  {cert.logo && (
+                    <Image
+                      src={cert.logo}
+                      alt=""
+                      width={44}
+                      height={44}
+                      loading="lazy"
+                      decoding="async"
+                      onerror="this.remove()"
+                      class="absolute inset-0 h-full w-full bg-white object-contain p-2"
+                    />
+                  )}
+                </span>
+              </span>
+
+              <span class="relative z-10 min-w-0 flex-1">
+                <span class="block text-[15px] font-medium leading-snug tracking-[-0.02em] text-[#e5e5e5]">
+                  {cert.title}
+                </span>
+
+                <span class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+                  {cert.issuer && <span class="text-[#888]">{cert.issuer}</span>}
+                  <span class="text-[#666]">{cert.date}</span>
+                </span>
+              </span>
+
+              <ArrowUpRight class="relative z-10 h-4 w-4 shrink-0 text-[#444] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#f5f5f5]" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Popup: one hidden panel per certificate, shown when its card is clicked -->
+      <dialog id="cert-dialog" aria-label="Certificate details" class="cert-dialog">
+        <div class="flex max-h-[90vh] flex-col">
+          <div class="flex items-center justify-between gap-4 border-b border-[#232323] px-5 py-3">
+            <p class="m-0 text-sm font-medium tracking-[-0.01em]">Certificate</p>
+
+            <button
+              type="button"
+              data-cert-close
+              aria-label="Close"
+              class="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[#2a2a2a] bg-transparent text-[#aaa] transition-colors duration-200 hover:border-[#666] hover:text-[#f5f5f5]"
+            >
+              <X class="h-4 w-4" />
+            </button>
+          </div>
+
+          <div data-cert-body class="min-h-0 flex-1 overflow-y-auto">
+            {certificates.map((cert, i) => {
+              const images = cert.images ?? [];
+              const skills = cert.skills ?? [];
+
+              return (
+                <div data-cert-panel={i} class="hidden">
+                  <div class="p-6 md:p-8">
+                    <!-- Header -->
+                    <div class="flex items-start gap-4">
+                      <span class="seal shrink-0 rounded-full p-px">
+                        <span class="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-[#111] text-sm font-medium tracking-wide text-[#bbb]">
+                          {initials(cert.issuer || cert.title)}
+                          {cert.logo && (
+                            <Image
+                              src={cert.logo}
+                              alt=""
+                              width={48}
+                              height={48}
+                              loading="lazy"
+                              decoding="async"
+                              onerror="this.remove()"
+                              class="absolute inset-0 h-full w-full bg-white object-contain p-2"
+                            />
+                          )}
+                        </span>
+                      </span>
+
+                      <div class="min-w-0">
+                        <h3 class="m-0 text-[clamp(1.4rem,3vw,2rem)] font-medium leading-[1.1] tracking-[-0.04em]">
+                          {cert.title}
+                        </h3>
+
+                        <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+                          {cert.issuer && <span class="text-[#888]">{cert.issuer}</span>}
+                          <span class="text-[#666]">{cert.date}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Images: one image, or a swipeable carousel for several -->
+                    {images.length > 0 && (
+                      <div class="relative mt-6 overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#111]">
+                        <div data-track class="no-scrollbar flex snap-x snap-mandatory overflow-x-auto scroll-smooth">
+                          {images.map((src, n) => {
+                            const local = resolveImage(src);
+                            const alt = `${cert.title}, image ${n + 1} of ${images.length}`;
+
+                            return (
+                              <div class="h-[min(52vh,480px)] w-full shrink-0 snap-center p-3">
+                                {local ? (
+                                  <Image
+                                    src={local}
+                                    alt={alt}
+                                    widths={[640, 960, 1280]}
+                                    sizes="(min-width: 900px) 770px, 90vw"
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="h-full w-full object-contain"
+                                  />
+                                ) : (
+                                  <Image
+                                    src={src}
+                                    alt={alt}
+                                    width={1600}
+                                    height={1131}
+                                    loading="lazy"
+                                    decoding="async"
+                                    class="h-full w-full object-contain"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {images.length > 1 && (
+                          <>
+                            <button
+                              type="button"
+                              data-prev
+                              aria-label="Previous image"
+                              class="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-black/60 text-[#ddd] backdrop-blur transition-colors duration-200 hover:text-white"
+                            >
+                              <ChevronLeft class="h-4 w-4" />
+                            </button>
+
+                            <button
+                              type="button"
+                              data-next
+                              aria-label="Next image"
+                              class="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-black/60 text-[#ddd] backdrop-blur transition-colors duration-200 hover:text-white"
+                            >
+                              <ChevronRight class="h-4 w-4" />
+                            </button>
+
+                            <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 backdrop-blur">
+                              {images.map(() => (
+                                <span data-dot class="dot h-1.5 w-1.5 rounded-full" />
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    <!-- Credential: shows whichever of ID and link you provided -->
+                    {(cert.credentialId || cert.credentialUrl) && (
+                      <div class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#1f1f1f] bg-[#101010] px-4 py-3.5">
+                        {cert.credentialId && (
+                          <div class="min-w-0">
+                            <p class="m-0 text-xs text-[#666]">Credential ID</p>
+                            <button
+                              type="button"
+                              data-copy-id
+                              data-id={cert.credentialId}
+                              class="mt-1 inline-flex max-w-full cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-sm text-[#d4d4d4] transition-colors duration-200 hover:text-white"
+                            >
+                              <span class="truncate">{cert.credentialId}</span>
+                              <Copy class="h-3.5 w-3.5 shrink-0 text-[#666]" />
+                              <span data-copy-label class="shrink-0 text-xs text-[#666]">
+                                Copy
+                              </span>
+                            </button>
+                          </div>
+                        )}
+
+                        {cert.credentialUrl && (
+                          <a
+                            href={cert.credentialUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group/link inline-flex items-center gap-2 rounded-full bg-[#f5f5f5] px-5 py-2.5 text-sm font-medium text-[#0a0a0a] no-underline transition-transform duration-200 hover:-translate-y-0.5"
+                          >
+                            View credential
+                            <ArrowUpRight class="h-4 w-4 transition-transform duration-200 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    <!-- Skills -->
+                    {skills.length > 0 && (
+                      <div class="mt-6">
+                        <p class="m-0 text-xs text-[#666]">Skills</p>
+                        <ul class="m-0 mt-3 flex list-none flex-wrap gap-2 p-0">
+                          {skills.map((skill) => (
+                            <li class="rounded-full bg-white/[0.05] px-3 py-1.5 text-xs text-[#a5a5a5]">
+                              {skill}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </dialog>
+    </section>
+  )
+}
+
+<style>
+  /* Metallic ring around the seal */
+  .seal {
+    background: conic-gradient(
+      from 140deg,
+      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.32),
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.4)
+    );
+  }
+
+  /* Carousel */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dot {
+    background: rgba(255, 255, 255, 0.3);
+    transition: background-color 200ms ease;
+  }
+
+  .dot[data-active="true"] {
+    background: #fff;
+  }
+
+  /* Cursor spotlight, same treatment as the skills grid */
+  .spot-card::before,
+  .spot-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+
+  .spot-card::before {
+    padding: 1px;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.65),
+      transparent 65%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
+
+  .spot-card::after {
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 255, 255, 0.05),
+      transparent 70%
+    );
+  }
+
+  @media (hover: hover) {
+    [data-spot-grid]:hover .spot-card::before,
+    [data-spot-grid]:hover .spot-card::after {
+      opacity: 1;
+    }
+  }
+
+  /* Popup (margin: auto keeps it centred despite Tailwind's reset) */
+  .cert-dialog {
+    margin: auto;
+    width: min(860px, 94vw);
+    max-width: none;
+    max-height: 90vh;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #232323;
+    border-radius: 20px;
+    background: #0e0e0e;
+    color: #f5f5f5;
+    box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.9);
+  }
+
+  .cert-dialog[open] {
+    animation: cert-pop 220ms ease-out;
+  }
+
+  .cert-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  @keyframes cert-pop {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spot-card::before,
+    .spot-card::after,
+    .dot {
+      transition: none;
+    }
+
+    .cert-dialog[open] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  // Cursor spotlight
+  document.querySelectorAll<HTMLElement>("[data-spot-grid]").forEach((grid) => {
+    const cards = grid.querySelectorAll<HTMLElement>("[data-spot-card]");
+
+    grid.addEventListener("pointermove", (e) => {
+      cards.forEach((card) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        card.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    });
+  });
+
+  // Popup + carousels
+  const dialog = document.querySelector<HTMLDialogElement>("#cert-dialog");
+  const body = document.querySelector<HTMLElement>("[data-cert-body]");
+  const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-cert-panel]"));
+  let active: HTMLElement | null = null;
+
+  if (dialog && body) {
+    // Carousel controls for each panel
+    panels.forEach((panel) => {
+      const track = panel.querySelector<HTMLElement>("[data-track]");
+      if (!track) return;
+
+      const dots = panel.querySelectorAll<HTMLElement>("[data-dot]");
+      const slide = (direction: number) =>
+        track.scrollBy({ left: direction * track.clientWidth, behavior: "smooth" });
+
+      panel.querySelector("[data-prev]")?.addEventListener("click", () => slide(-1));
+      panel.querySelector("[data-next]")?.addEventListener("click", () => slide(1));
+
+      track.addEventListener(
+        "scroll",
+        () => {
+          const index = Math.round(track.scrollLeft / (track.clientWidth || 1));
+          dots.forEach((dot, n) => (dot.dataset.active = String(n === index)));
+        },
+        { passive: true }
+      );
+    });
+
+    const open = (index: number) => {
+      panels.forEach((panel, n) => panel.classList.toggle("hidden", n !== index));
+      active = panels[index] ?? null;
+
+      const track = active?.querySelector<HTMLElement>("[data-track]");
+      if (track) track.scrollLeft = 0;
+
+      dialog.showModal();
+      document.documentElement.style.overflow = "hidden";
+      body.scrollTop = 0;
+      track?.dispatchEvent(new Event("scroll"));
+    };
+
+    document.querySelectorAll<HTMLElement>("[data-cert-open]").forEach((card) => {
+      card.addEventListener("click", () => open(Number(card.dataset.certOpen)));
+    });
+
+    dialog.addEventListener("click", async (e) => {
+      const target = e.target as HTMLElement;
+
+      if (target === dialog || target.closest("[data-cert-close]")) {
+        dialog.close();
+        return;
+      }
+
+      const copy = target.closest<HTMLElement>("[data-copy-id]");
+      if (copy) {
+        const label = copy.querySelector<HTMLElement>("[data-copy-label]");
+        try {
+          await navigator.clipboard.writeText(copy.dataset.id ?? "");
+          if (label) {
+            label.textContent = "Copied";
+            setTimeout(() => (label.textContent = "Copy"), 1600);
+          }
+        } catch {
+          if (label) label.textContent = "Copy failed";
+        }
+      }
+    });
+
+    // Left / right arrow keys move the carousel
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") active?.querySelector<HTMLElement>("[data-prev]")?.click();
+      if (e.key === "ArrowRight") active?.querySelector<HTMLElement>("[data-next]")?.click();
+    });
+
+    dialog.addEventListener("close", () => {
+      document.documentElement.style.overflow = "";
+    });
+  }
+</script>

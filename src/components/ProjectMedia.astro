@@ -1,0 +1,154 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import { Minus, Square, X } from "lucide-astro";
+import type { Project } from "../../data/projects";
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+
+/* Screenshots live in src/assets/projects/ (same file names as in projects.ts). */
+const localImages = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/projects/*.{png,jpg,jpeg,webp,avif}",
+  { eager: true }
+);
+const file = project.image.split("/").pop() ?? "";
+const local = localImages[`/src/assets/projects/${file}`]?.default;
+
+const type = project.type ?? "web";
+const landscape = type === "mobile" && project.orientation === "landscape";
+const portrait = type === "mobile" && !landscape;
+
+const shape = portrait
+  ? { widths: [320, 480, 640], sizes: "260px", w: 900, h: 1950 }
+  : landscape
+    ? { widths: [640, 960, 1280], sizes: "460px", w: 1950, h: 900 }
+    : { widths: [640, 960, 1280], sizes: "(min-width: 1024px) 640px, 100vw", w: 1600, h: 1000 };
+
+/* Optimised when the file is in src/assets, otherwise falls back to the /public path. */
+const imageProps = local
+  ? { src: local, widths: shape.widths, sizes: shape.sizes }
+  : { src: project.image, width: shape.w, height: shape.h };
+
+const imgClass = [
+  "h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]",
+  landscape ? "object-center" : "object-top",
+].join(" ");
+
+const host = (url?: string) => {
+  if (!url) return "";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+};
+const address = host(project.liveUrl);
+---
+
+<!-- Phones sit on a soft "stage" so the card height stays balanced -->
+<div
+  class:list={[
+    type === "mobile" &&
+      "flex items-center justify-center rounded-2xl border border-[#1f1f1f] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.06),transparent_70%)] py-6",
+  ]}
+>
+  <div
+    class:list={[
+      "relative",
+      type === "web" && "overflow-hidden rounded-xl border border-[#252525] bg-[#111]",
+      type === "desktop" &&
+        "overflow-hidden rounded-xl border border-[#2c2c2c] bg-[#111] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]",
+      portrait &&
+        "w-[200px] rounded-[2.4rem] border-[7px] border-[#1d1d1d] bg-black shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] ring-1 ring-white/10 sm:w-[215px]",
+      landscape &&
+        "w-full max-w-[440px] rounded-[2.1rem] border-[7px] border-[#1d1d1d] bg-black shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)] ring-1 ring-white/10",
+    ]}
+  >
+    <!-- Web: browser bar -->
+    {
+      type === "web" && (
+        <div class="flex h-10 items-center gap-2 border-b border-[#222] bg-[#151515] px-4">
+          <span class="h-3 w-3 rounded-full bg-[#ff5f57]" />
+          <span class="h-3 w-3 rounded-full bg-[#febc2e]" />
+          <span class="h-3 w-3 rounded-full bg-[#28c840]" />
+          {address && (
+            <span class="ml-3 truncate rounded-md bg-[#0e0e0e] px-3 py-1 text-[11px] text-[#666]">
+              {address}
+            </span>
+          )}
+        </div>
+      )
+    }
+
+    <!-- Desktop app: window title bar with Windows-style controls -->
+    {
+      type === "desktop" && (
+        <div class="flex h-9 items-center justify-between border-b border-[#262626] bg-[#151515] pl-3">
+          <div class="flex min-w-0 items-center gap-2">
+            <span class="h-3.5 w-3.5 shrink-0 rounded-[4px] bg-gradient-to-br from-[#888] to-[#333]" />
+            <span class="truncate text-[11px] text-[#888]">{project.title}</span>
+          </div>
+
+          <div class="flex text-[#777]">
+            <span class="flex h-9 w-11 items-center justify-center">
+              <Minus class="h-3 w-3" stroke-width="1.5" />
+            </span>
+            <span class="flex h-9 w-11 items-center justify-center">
+              <Square class="h-2.5 w-2.5" stroke-width="1.5" />
+            </span>
+            <span class="flex h-9 w-11 items-center justify-center">
+              <X class="h-3.5 w-3.5" stroke-width="1.5" />
+            </span>
+          </div>
+        </div>
+      )
+    }
+
+    <!-- Phone hardware buttons -->
+    {
+      portrait && (
+        <>
+          <span class="absolute -right-[10px] top-24 h-14 w-[3px] rounded-r bg-[#2a2a2a]" />
+          <span class="absolute -left-[10px] top-20 h-8 w-[3px] rounded-l bg-[#2a2a2a]" />
+          <span class="absolute -left-[10px] top-32 h-8 w-[3px] rounded-l bg-[#2a2a2a]" />
+        </>
+      )
+    }
+    {
+      landscape && (
+        <>
+          <span class="absolute -top-[10px] right-24 h-[3px] w-14 rounded-t bg-[#2a2a2a]" />
+          <span class="absolute -top-[10px] left-20 h-[3px] w-8 rounded-t bg-[#2a2a2a]" />
+          <span class="absolute -top-[10px] left-32 h-[3px] w-8 rounded-t bg-[#2a2a2a]" />
+        </>
+      )
+    }
+
+    <!-- Screen -->
+    <div
+      class:list={[
+        "relative overflow-hidden",
+        (type === "web" || type === "desktop") && "aspect-[16/10]",
+        portrait && "aspect-[9/19.5] rounded-[1.9rem]",
+        landscape && "aspect-[19.5/9] rounded-[1.6rem]",
+      ]}
+    >
+      {
+        portrait && (
+          <span class="absolute left-1/2 top-2 z-10 h-4 w-16 -translate-x-1/2 rounded-full bg-black" />
+        )
+      }
+      {
+        landscape && (
+          <span class="absolute left-2 top-1/2 z-10 h-16 w-4 -translate-y-1/2 rounded-full bg-black" />
+        )
+      }
+
+      <Image {...imageProps} alt={`${project.title} screenshot`} loading="lazy" class={imgClass} />
+    </div>
+  </div>
+</div>

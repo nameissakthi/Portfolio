@@ -34,10 +34,6 @@ const total = skillGroups.reduce((n, g) => n + g.skills.length, 0);
       >
         What I<br />build with.
       </h2>
-
-      <p class="m-0 max-w-[300px] text-sm leading-relaxed text-[#6f6f6f]">
-        {total} tools across {skillGroups.length} areas, from the database to the browser.
-      </p>
     </header>
 
     <!-- Bento grid -->
@@ -50,7 +46,6 @@ const total = skillGroups.reduce((n, g) => n + g.skills.length, 0);
           >
             <h3 class="m-0 mb-5 text-lg font-medium leading-[1.2] tracking-[-0.02em]">
               {group.title}
-              <span class="ml-2 text-sm font-normal text-[#555]">{group.skills.length}</span>
             </h3>
 
             <ul class="relative z-10 m-0 flex list-none flex-wrap gap-2 p-0">

@@ -1,14 +1,15 @@
 ---
-import { ArrowUpRight, Github, Linkedin, Mail, Copy } from "lucide-astro";
+import { ArrowUpRight, Github, Linkedin, FileText, Copy } from "lucide-astro";
 import { personal } from "../../data/details";
 
 const channels = [
   {
-    label: "Email",
-    value: personal.email,
-    href: `mailto:${personal.email}`,
-    Icon: Mail,
+    label: "Resume",
+    value: "View or download",
+    href: personal.resume.replace(/^\/public/, ""),
+    Icon: FileText,
     external: false,
+    resume: true,
   },
   {
     label: "GitHub",
@@ -70,12 +71,13 @@ const channels = [
     <!-- Channels -->
     <div data-spot-grid class="grid grid-cols-1 gap-3 md:grid-cols-3">
       {
-        channels.map(({ label, value, href, Icon, external }) => (
+        channels.map(({ label, value, href, Icon, external, resume }) => (
           <a
             href={href}
             target={external ? "_blank" : undefined}
             rel={external ? "noopener noreferrer" : undefined}
             data-spot-card
+            data-resume-open={resume ? "" : undefined}
             class="spot-card group relative flex min-h-[170px] flex-col justify-between rounded-2xl border border-[#1c1c1c] bg-[#0e0e0e] p-6 text-[#f5f5f5] no-underline"
           >
             <div class="relative z-10 flex items-start justify-between">

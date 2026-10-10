@@ -1,4 +1,4 @@
-import { Globe } from "lucide-astro";
+import { Globe, Boxes } from "lucide-astro";
 
 export const ICON_BASE =
   "https://cdn.jsdelivr.net/npm/simple-icons@13/icons";
@@ -33,12 +33,6 @@ export const skillGroups = [
 
     skills: [
       {
-        name: "React",
-        slug: "react",
-        color: "#61DAFB",
-      },
-
-      {
         name: "HTML",
         slug: "html5",
         color: "#E34F26",
@@ -48,6 +42,30 @@ export const skillGroups = [
         name: "CSS",
         slug: "css3",
         color: "#1572B6",
+      },
+
+      {
+        name: "React",
+        slug: "react",
+        color: "#61DAFB",
+      },
+
+      {
+        name : "React Native Expo",
+        slug : "expo",
+        color : "#FFFFFF"
+      },
+
+      {
+        name : "Bootstrap",
+        slug : "bootstrap",
+        color : "#7952B3"
+      },
+
+      {
+        name : "Tailwind CSS",
+        slug : "tailwindcss",
+        color : "#22D3EE"
       },
     ],
   },
@@ -73,6 +91,12 @@ export const skillGroups = [
         lucide: Globe,
         color: "#e5e5e5",
       },
+
+      {
+        name : "Microservices",
+        lucide : Boxes,
+        color : "#FF6B6B"
+      }
     ],
   },
 
@@ -105,10 +129,22 @@ export const skillGroups = [
       },
 
       {
+        name : "Github",
+        slug : "github",
+        color : "#FFFFFF"
+      },
+
+      {
         name: "Docker",
         slug: "docker",
         color: "#2496ED",
       },
+
+      {
+        name : "Postman",
+        slug : "postman",
+        color : "#FF6C37"
+      }
     ],
   },
 ];
