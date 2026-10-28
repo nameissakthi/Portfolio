@@ -144,7 +144,13 @@ export const skillGroups = [
         name : "Postman",
         slug : "postman",
         color : "#FF6C37"
-      }
+      },
+
+      {
+        name : "AWS",
+        slug : "amazonwebservices",
+        color : "#FF9900"
+      },
     ],
   },
 ];
